@@ -21,6 +21,18 @@ contract MyToken {
         name = _name;
         symbol = _symbol;
         decimals = _decimal;
+        _mint(1 * 10 ** uint256(decimals), msg.sender); // 이 컨트랙트를 배포하는 사람한테 이만큼의 어마운트를 발행하는 것, 1MT
+    } // solidity에서 변수는 기본적으로 uint256 타입이다, 기본적으로 모든 값을 32바이트로 처리해서
+
+    //transaction
+    //from, to, data, value, gas,...
+    // 생성자를 불러올때만 배포되니까 totalSupply는 영원히 1이겠징 추가발행을 금지하려면 이렇게...
+
+    function _mint(uint256 amount, address owner) internal {
+        totalSupply += amount; //누군가에게 발행한 토큰을 안넣어주면 토큰이 증발함
+        balanceOf[owner] += amount;
+        // totalSupply = totalSupply + amount;
+        // balanceOf[owner] = balanceOf[owner] + amount;
     }
 
     // function totalSupply() external view returns (uint256) {
