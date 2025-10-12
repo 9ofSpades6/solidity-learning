@@ -17,11 +17,18 @@ contract MyToken {
     uint256 public totalSupply; //총 발행량
     mapping(address => uint256) public balanceOf; // 누가 얼마를 가지고 있느냐
 
-    constructor(string memory _name, string memory _symbol, uint8 _decimal) {
+    // 데이터를 조회하는 것은 tx로 처리되지 않음. 그냥 api call로 리턴해줌
+
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        uint8 _decimal,
+        uint256 _amount
+    ) {
         name = _name;
         symbol = _symbol;
         decimals = _decimal;
-        _mint(1 * 10 ** uint256(decimals), msg.sender); // 이 컨트랙트를 배포하는 사람한테 이만큼의 어마운트를 발행하는 것, 1MT
+        _mint(_amount * 10 ** uint256(decimals), msg.sender); // 이 컨트랙트를 배포하는 사람한테 이만큼의 어마운트를 발행하는 것, 1MT
     } // solidity에서 변수는 기본적으로 uint256 타입이다, 기본적으로 모든 값을 32바이트로 처리해서
 
     //transaction
@@ -44,4 +51,10 @@ contract MyToken {
     // function name() external view returns (string memory) {
     // return name; // 스트링 타입은 길이가 정해져 있지 않아서 메모리를 사용해서 반환하라 해줘야함
     // }
+
+    function transfer(uint256 amount, address to) external {
+        require(balanceOf[msg.sender] >= amount, "insufficient balance");
+        balanceOf[msg.sender] -= amount; //가지고 있는 토큰보다 더 많은 양을 보내게 되면?? 오버플로 발생! uint라서 음수가 만들어질 수 없는데 음수를 만들려한 거임
+        balanceOf[to] += amount;
+    }
 }
