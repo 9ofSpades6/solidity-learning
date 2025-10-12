@@ -19,7 +19,7 @@ contract MyToken {
     uint256 public totalSupply; //총 발행량
     mapping(address => uint256) public balanceOf; // 누가 얼마를 가지고 있느냐
     // 데이터를 조회하는 것은 tx로 처리되지 않음. 그냥 api call로 리턴해줌
-    mapping(address => mapping(address => uint256)) allowance;
+    mapping(address => mapping(address => uint256)) public allowance;
 
     constructor(
         string memory _name,
