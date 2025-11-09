@@ -7,8 +7,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28; // 컴파일러에게 소스 코드를 어떻게 처리해야하는지 지시하는 명령문
 
+import "./ManagedAccess.sol";
+
 // class 대신 contract
-contract MyToken {
+contract MyToken is ManagedAccess {
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed spender, uint256 amount);
     string public name;
@@ -26,7 +28,7 @@ contract MyToken {
         string memory _symbol,
         uint8 _decimal,
         uint256 _amount
-    ) {
+    ) ManagedAccess(msg.sender, msg.sender) {
         name = _name;
         symbol = _symbol;
         decimals = _decimal;
@@ -51,16 +53,20 @@ contract MyToken {
         emit Transfer(from, to, amount);
     }
 
-    function mint(uint256 amount, address owner) external {
-        _mint(amount, owner);
+    function mint(uint256 amount, address to) external onlyManager {
+        _mint(amount, to);
     }
 
-    function _mint(uint256 amount, address owner) internal {
+    function setManager(address _manager) external onlyOwner {
+        manager = _manager;
+    }
+
+    function _mint(uint256 amount, address to) internal {
         totalSupply += amount; //누군가에게 발행한 토큰을 안넣어주면 토큰이 증발함
-        balanceOf[owner] += amount;
+        balanceOf[to] += amount;
         // totalSupply = totalSupply + amount;
         // balanceOf[owner] = balanceOf[owner] + amount;
-        emit Transfer(address(0), owner, amount);
+        emit Transfer(address(0), to, amount);
     }
 
     // function totalSupply() external view returns (uint256) {
