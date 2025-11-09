@@ -51,6 +51,10 @@ contract MyToken {
         emit Transfer(from, to, amount);
     }
 
+    function mint(uint256 amount, address owner) external {
+        _mint(amount, owner);
+    }
+
     function _mint(uint256 amount, address owner) internal {
         totalSupply += amount; //누군가에게 발행한 토큰을 안넣어주면 토큰이 증발함
         balanceOf[owner] += amount;
