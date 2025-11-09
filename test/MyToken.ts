@@ -18,7 +18,7 @@ describe("My Token", () => {
             "MyToken",
             "MT",
             decimals,
-            100,
+            mintingAmount,
         ]);
     });
     describe("Basic state value check", () => {
