@@ -46,27 +46,30 @@ contract TinyBank {
     }
 
     // who? when?
-    function distributeReward(address to) internal {
-        uint256 blocks = block.number - lastClaimedBlock[to];
-        uint256 reward = (blocks * rewardPerBlock * staked[to]) / totalStaked;
-        stakingToken.mint(reward, to);
+    // initialize시에, genesis staking할 때, totalStaked가 0이겠지.
+    modifier updateReward(address to) {
+        if (staked[to] > 0) {
+            uint256 blocks = block.number - lastClaimedBlock[to];
+            uint256 reward = (blocks * rewardPerBlock * staked[to]) /
+                totalStaked;
+            stakingToken.mint(reward, to);
+        }
         lastClaimedBlock[to] = block.number;
+        _; //어떤 함수가 modifier를 호출하고 싳으면 그 앞에 내용을 포함하라는 것. caller's code
     }
 
-    function stake(uint256 _amount) external {
+    function stake(uint256 _amount) external updateReward(msg.sender) {
         //IMyToken.transfer(msg.sender, address(this), _amount); //this는 현재 컨트랙트를 의미함. // 그리고 이 줄에는 문제가 있음. 이 함수를 호출하려면 토큰의 오너가 호출해야함.
         // 근데 이 함수는 TinyBank가 호출하고 있음. 컨트랙트가 다른 컨트랙트의 함수를 호출중임. 그래서 transfer 말고 transferfrom 사용.
         require(_amount >= 0, "cannot stake 0 amount");
-        distributeReward(msg.sender);
         stakingToken.transferFrom(msg.sender, address(this), _amount);
         staked[msg.sender] += _amount;
         totalStaked += _amount;
         emit Staked(msg.sender, _amount);
     }
 
-    function withdraw(uint256 _amount) external {
+    function withdraw(uint256 _amount) external updateReward(msg.sender) {
         require(staked[msg.sender] >= _amount, "insufficient staked token");
-        distributeReward(msg.sender);
         stakingToken.transfer(_amount, msg.sender);
         staked[msg.sender] -= _amount;
         totalStaked -= _amount;
