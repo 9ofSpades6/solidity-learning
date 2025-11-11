@@ -1,3 +1,9 @@
+// Centralization vs Decentralization
+// a single DB    vs Distributed Ledger DB
+// asingle BN     vs BN network
+// Governance : 통치, 관리 -> vote, voting 블록체인에서는.
+// A agenda --> by vote --> decision
+
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 

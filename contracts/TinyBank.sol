@@ -20,7 +20,7 @@
 
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
-import "./ManagedAccess.sol";
+import "./MultiManagedAccess.sol";
 
 interface IMyToken {
     function transfer(uint256 amount, address to) external;
@@ -30,7 +30,7 @@ interface IMyToken {
     function mint(uint256 amount, address owner) external;
 }
 
-contract TinyBank is ManagedAccess {
+contract TinyBank is MultiManagedAccess {
     event Staked(address, uint256);
     event Withdraw(uint256 amount, address to);
 
@@ -44,7 +44,11 @@ contract TinyBank is ManagedAccess {
     mapping(address => uint256) public staked;
     uint256 public totalStaked; //myToken의 totalsupply와 balanceof와 헷갈림. 이건 tinybank 서비스를 이용하는 사람들이 예치해놓은 토큰량의 합. totalsupply는 각자 가지고 있는거.
 
-    constructor(IMyToken _stakingToken) ManagedAccess(msg.sender, msg.sender) {
+    constructor(
+        address[] memory _managers,
+        uint _manager_numbers,
+        IMyToken _stakingToken
+    ) MultiManagedAccess(msg.sender, _managers, _manager_numbers) {
         stakingToken = _stakingToken;
         rewardPerBlock = defaultRewardPerBlock;
     }
@@ -62,8 +66,9 @@ contract TinyBank is ManagedAccess {
         _; //어떤 함수가 modifier를 호출하고 싳으면 그 앞에 내용을 포함하라는 것. caller's code
     }
 
-    function setRewardPerBlock(uint256 _amount) external onlyManager {
+    function setRewardPerBlock(uint256 _amount) external onlyAllConfirmed {
         rewardPerBlock = _amount;
+        reset();
     }
 
     function stake(uint256 _amount) external updateReward(msg.sender) {
